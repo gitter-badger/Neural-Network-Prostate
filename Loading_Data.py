@@ -18,7 +18,7 @@ for filename in glob.glob("*.jpg"):
 	
 	data = tf.image.decode_jpeg(filename, channels=1, ratio=None, fancy_upscaling=None, 	try_recover_truncated=None, acceptable_fraction=None, name= 'Decoded Jpeg')
 	
-	tf.train.match_filenames_once('Gleason 3', name = "GLEASON 3")
+	tf.train.match_filenames_once('Gleason 3', name = "GLEASON_3")
 	
 	print data
 	
@@ -32,7 +32,7 @@ for filename in glob.glob("*.jpg"):
 	
 	data2 = tf.image.decode_jpeg(filename, channels=1, ratio=None, fancy_upscaling=None, 	try_recover_truncated=None, acceptable_fraction=None, name= 'Decoded Jpeg')
 	
-	tf.train.match_filenames_once('Gleason 4 Cribiform', name = "GLEASON 4 CRIBIFORM")
+	tf.train.match_filenames_once('Gleason 4 Cribiform', name = "GLEASON_4_CRIBIFORM")
 	
 	print data2
 	
@@ -45,7 +45,7 @@ for filename in glob.glob("*.jpg"):
 	
 	data3 = tf.image.decode_jpeg(filename, channels=1, ratio=None, fancy_upscaling=None, 	try_recover_truncated=None, acceptable_fraction=None, name= 'Decoded Jpeg')
 	
-	tf.train.match_filenames_once('Gleason 4 Cribiform', name = "GLEASON 4 CRIBIFORM")
+	tf.train.match_filenames_once('Gleason 4 Non Cribiform', name = "GLEASON_4_NON_CRIBIFORM")
 	
 	print data3
 
@@ -58,7 +58,7 @@ for filename in glob.glob("*.jpg"):
 	
 	data4 = tf.image.decode_jpeg(filename, channels=1, ratio=None, fancy_upscaling=None, 	try_recover_truncated=None, acceptable_fraction=None, name= 'Decoded Jpeg')
 	
-	tf.train.match_filenames_once('Gleason 4 Cribiform', name = "GLEASON 4 CRIBIFORM")
+	tf.train.match_filenames_once('Normal Prostate', name = "NORMAL_PROSTATE")
 	
 	print data4
 
