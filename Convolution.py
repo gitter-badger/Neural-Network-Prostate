@@ -8,16 +8,10 @@ import Loading_Data
 
 sess = tf.InteractiveSession()
 
-x = tf.placeholder("float", shape = [Loading_Data.data])
-
-x1 = tf.placeholder("float", shape = [None, 9])
-w1 = tf.Variable(tf.zeros([9, 4]))
-
-x2 = tf.placeholder("float", shape = [None, 4])
-w2 = tf.Variable(tf.zeros([4, 3]))
-
-b1 = tf.Variable(tf.zeros([4]))
-b2 = tf.Variable(tf.zeros([3]))
+x = tf.placeholder(tf.float32, shape = [None, 4900])
+y_ = tf.placeholder(tf.float32, shape = [None, 4])
+W = tf.Variable(tf.zeros([4900, 4]))
+b = tf.Variable(tf.zeros([4]))
 
 def weight_variable(shape):
 	initial = tf.truncated_normal(shape, stddev = 0.1)
@@ -28,7 +22,9 @@ def bias_variable(shape):
 	return tf.Variable(initial)
 
 def conv2d(x, w):
-	return tf.nn.conv2d(x, w, strides = [3, 3, 1, 1], padding = 'SAME')
+	return tf.nn.conv2d(x, w, strides = [5, 5, 1, 1], padding = 'SAME')
+	#After conv2d there is 122500 matrix.
 
-def max_pool_3x3(x):
-	return tf.nn.max_pool(x, ksize = [1, 3, 3, 1], strides = [1, 1, 1, 1], padding = 'SAME')
+def max_pool_5x5(x):
+	return tf.nn.max_pool(x, ksize = [1, 5, 5, 1], strides = [1, 1, 1, 1], padding = 'SAME')
+	#After the max_pool there is 4900 matrix.
