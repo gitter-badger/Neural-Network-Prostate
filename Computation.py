@@ -5,8 +5,8 @@ import input_data
 
 sess = tf.InteractiveSession()
 
-x = tf.placeholder("float", shape = [1750, 1750])
-y_ = tf.placeholder("float", shape = [100, 4])
+x = tf.placeholder("float", shape = [None, 3062500])
+y_ = tf.placeholder("float", shape = [None, 4])
 
 def weight_variable(shape):
     initial = tf.truncated_normal(shape, stddev = 0.1)
@@ -19,9 +19,9 @@ def conv2d(x, W):
     return tf.nn.conv2d(x, W, strides = [1, 1, 1, 1], padding = 'SAME')
 
 def max_pool_5x5(x):
-    return tf.nn.max_pool(x, ksize = [1, 5, 5, 1], strides = [1, 5, 5, 1], padding = 'SAME')
+    return tf.nn.max_pool(x, ksize = [1, 5, 5, 1], strides = [1, 1, 1, 1], padding = 'SAME')
 
-W_conv1 = weight_variable([5, 5, 1, 122500])
+W_conv1 = weight_variable([25, 25, 1, 100])
 b_conv1 = bias_variable([122500])
 
 
