@@ -1,112 +1,73 @@
+import os
+import sys
 
-# Copyright 2015 Google Inc. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# ==============================================================================
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
-from datetime import datetime
-import os.path
-import time
-
-import numpy as np
-from six.moves import xrange  # pylint: disable=redefined-builtin
 import tensorflow as tf
-
-import Input.py
-
-from tensorflow.models.image.cifar10 import cifar10
+import Input
 
 FLAGS = tf.app.flags.FLAGS
 
-tf.app.flags.DEFINE_string('train_dir', '/tmp/cifar10_train',
-                           """Directory where to write event logs """
-                           """and checkpoint.""")
-tf.app.flags.DEFINE_integer('max_steps', 1000000,
-                            """Number of batches to run.""")
-tf.app.flags.DEFINE_boolean('log_device_placement', False,
-                            """Whether to log device placement.""")
+tf.app.flags.DEFINE_integer('batch_size', 100, "hello")
+tf.app.flags.DEFINE_string('data_dir', '/Volumes/Machine_Learning_Data', "hello")
 
+def inputs():
+  if not FLAGS.data_dir:
+    raise ValueError('Please supply a data_dir')
+  data_dir = os.path.join(FLAGS.data_dir, 'Data')
+  images, labels = Input.inputs(data_dir = data_dir, batch_size = FLAGS.batch_size)
+  return images, labels
 
-def train():
-  with tf.Graph().as_default():
-    global_step = tf.Variable(0, trainable=False)
+def weight_variable(shape):
+    initial = tf.truncated_normal(shape, stddev=0.1)
+    return tf.Variable(initial)
 
-    # Get images and labels for CIFAR-10.
-     images, labels = Input.distorted_inputs()
+def bias_variable(shape):
+    initial = tf.constant(0.1, shape = shape)
+    return tf.Variable(initial)
 
-    # Build a Graph that computes the logits predictions from the
-    # inference model.
-    logits = Input.inference(images)
+def conv2d(images, W):
+    return tf.nn.conv2d(images, W, strides = [1, 1, 1, 1], padding = 'SAME')
 
-    # Calculate loss.
-    loss = Input.loss(logits, labels)
+def max_pool_5x5(images):
+    return tf.nn.max_pool(images, ksize = [1, 5, 5, 1], strides = [1, 1, 1, 1], padding = 'SAME')
 
-    # Build a Graph that trains the model with one batch of examples and
-    # updates the model parameters.
-    train_op = Input.train(loss, global_step)
+def forward_propagation(images):
+  with tf.variable_scope('conv1') as scope:
+      W_conv1 = weight_variable([250, 245, 1, 100])
+      b_conv1 = bias_variable([100])
+      image_matrix = tf.reshape(images, [-1, 1750, 1750, 1])
+      h_conv1 = tf.nn.sigmoid(conv2d(image_matrix, W_conv1) + b_conv1)
+      h_pool1 = max_pool_5x5(h_conv1)
 
-    # Create a saver.
-    saver = tf.train.Saver(tf.all_variables())
+  with tf.variable_scope('conv2') as scope:
+      W_conv2 = weight_variable([125, 125, 100, 150])
+      b_conv2 = bias_variable([150])
+      h_conv2 = tf.nn.sigmoid(conv2d(h_pool1, W_conv2) + b_conv2)
+      h_pool2 = max_pool_5x5(h_conv2)
 
-    # Build the summary operation based on the TF collection of Summaries.
-    summary_op = tf.merge_all_summaries()
+  with tf.variable_scope('conv3') as scope:
+      W_conv3 = weight_variable([50, 50, 150, 200])
+      b_conv3 = bias_variable([200])
+      h_conv3 = tf.nn.sigmoid(conv2d(h_pool2, W_conv3) + b_conv3)
+      h_pool3 = max_pool_5x5(h_conv3)
 
-    # Build an initialization operation to run below.
-    init = tf.initialize_all_variables()
+  with tf.variable_scope('local3') as scope:
+      W_fc1 = weight_variable([100 * 100 * 200, 250])
+      b_fc1 = bias_variable([250])
+      h_pool3_flat = tf.reshape(h_pool3, [-1, 100 * 100 * 200])
+      h_fc1 = tf.nn.sigmoid(tf.matmul(h_pool3_flat, W_fc1) + b_fc1)
+      keep_prob = tf.placeholder(tf.float32)
+      h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
+      W_fc2 = weight_variable([250, 4])
+      b_fc2 = bias_variable([4])
 
-    # Start running operations on the Graph.
-    sess = tf.Session(config=tf.ConfigProto(
-        log_device_placement=FLAGS.log_device_placement))
-    sess.run(init)
+      y_conv = tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
+      return y_conv
 
-    # Start the queue runners.
-    tf.train.start_queue_runners(sess=sess)
+def error(forward_propagation_results, labels):
+    labels = tf.cast(labels, tf.float32)
+    mean_squared_error = tf.square(tf.sub(labels, forward_propagation_results))
+    cost = tf.reduce_mean(mean_squared_error)
+    train = tf.train.GradientDescentOptimizer(learning_rate = 0.3).minimize(cost)
+    return train
 
-    summary_writer = tf.train.SummaryWriter(FLAGS.train_dir, sess.graph)
-
-    for step in xrange(FLAGS.max_steps):
-      start_time = time.time()
-      _, loss_value = sess.run([train_op, loss])
-      duration = time.time() - start_time
-
-      assert not np.isnan(loss_value), 'Model diverged with loss = NaN'
-
-      if step % 10 == 0:
-        num_examples_per_step = FLAGS.batch_size
-        examples_per_sec = num_examples_per_step / duration
-        sec_per_batch = float(duration)
-
-        format_str = ('%s: step %d, loss = %.2f (%.1f examples/sec; %.3f '
-                      'sec/batch)')
-        print (format_str % (datetime.now(), step, loss_value,
-                             examples_per_sec, sec_per_batch))
-
-      if step % 100 == 0:
-        summary_str = sess.run(summary_op)
-        summary_writer.add_summary(summary_str, step)
-
-      # Save the model checkpoint periodically.
-      if step % 1000 == 0 or (step + 1) == FLAGS.max_steps:
-        checkpoint_path = os.path.join(FLAGS.train_dir, 'model.ckpt')
-        saver.save(sess, checkpoint_path, global_step=step)
-
-
-def main(argv=None):  # pylint: disable=unused-argument
-  train()
-
-
-if __name__ == '__main__':
-  tf.app.run()
+    print cost
