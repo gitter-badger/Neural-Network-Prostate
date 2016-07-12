@@ -32,32 +32,32 @@ def max_pool_5x5(images):
 
 def forward_propagation(images):
   with tf.variable_scope('conv1') as scope:
-      W_conv1 = weight_variable([250, 245, 1, 100])
-      b_conv1 = bias_variable([100])
+      W_conv1 = weight_variable([5, 5, 1, 50])
+      b_conv1 = bias_variable([50])
       image_matrix = tf.reshape(images, [-1, 1750, 1750, 1])
       h_conv1 = tf.nn.sigmoid(conv2d(image_matrix, W_conv1) + b_conv1)
       h_pool1 = max_pool_5x5(h_conv1)
 
   with tf.variable_scope('conv2') as scope:
-      W_conv2 = weight_variable([125, 125, 100, 150])
-      b_conv2 = bias_variable([150])
+      W_conv2 = weight_variable([5, 5, 50, 100])
+      b_conv2 = bias_variable([100])
       h_conv2 = tf.nn.sigmoid(conv2d(h_pool1, W_conv2) + b_conv2)
       h_pool2 = max_pool_5x5(h_conv2)
 
   with tf.variable_scope('conv3') as scope:
-      W_conv3 = weight_variable([50, 50, 150, 200])
-      b_conv3 = bias_variable([200])
+      W_conv3 = weight_variable([5, 5, 100, 120])
+      b_conv3 = bias_variable([120])
       h_conv3 = tf.nn.sigmoid(conv2d(h_pool2, W_conv3) + b_conv3)
       h_pool3 = max_pool_5x5(h_conv3)
 
   with tf.variable_scope('local3') as scope:
-      W_fc1 = weight_variable([100 * 100 * 200, 250])
-      b_fc1 = bias_variable([250])
-      h_pool3_flat = tf.reshape(h_pool3, [-1, 100 * 100 * 200])
+      W_fc1 = weight_variable([100 * 100 * 120, 140])
+      b_fc1 = bias_variable([140])
+      h_pool3_flat = tf.reshape(h_pool3, [-1, 100 * 100 * 120])
       h_fc1 = tf.nn.sigmoid(tf.matmul(h_pool3_flat, W_fc1) + b_fc1)
       keep_prob = tf.placeholder(tf.float32)
       h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
-      W_fc2 = weight_variable([250, 4])
+      W_fc2 = weight_variable([140, 4])
       b_fc2 = bias_variable([4])
 
       y_conv = tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
