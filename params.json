@@ -1,0 +1,6 @@
+{
+  "name": "Neural-network-prostate",
+  "tagline": "Using Artificial Neural Networks to Diagnose Prostate Cancer Malignancy",
+  "body": "### About\r\nThis project aims to diagnose Prostate Cancer Malignancy according to the Gleason Grading system with at least an 95% accuracy rate.\r\n\r\n### Neural Networks\r\nThe project uses a Convolutional Neural Network with inputs of 1750 x 1750 pixels and runs through three consecutive layers  with 5x5 convolutions and pooling operations. The final layer consists of 14x14 neurons that branch out to 256 inputs. There are four labels, each representing Gleason Non-Cribiform 3, Gleason Non-Cribiform 4, Gleason Cribiform 4, and Normal Prostate as a control sample.\r\n\r\n### Technical Aspects\r\nComputation is done on CPU due to the lack of resources with the Google Tensorflow Library.\r\n\r\n### Authors and Contributors\r\nAll software is written by Zan Huang under the company StructML.\r\n\r\n### Support or Contact\r\nPlease contact struct.machine.learning@gmail.com for more information.",
+  "note": "Don't delete this file! It's used internally to help with page regeneration."
+}
