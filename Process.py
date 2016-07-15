@@ -7,7 +7,7 @@ import Input
 FLAGS = tf.app.flags.FLAGS
 
 tf.app.flags.DEFINE_integer('batch_size', 20, "hello")
-tf.app.flags.DEFINE_string('data_dir', '/Volumes/Machine_Learning_Data', "hello")
+tf.app.flags.DEFINE_string('data_dir', '/Volumes/Machine_Learning_Data/DATA', "hello")
 
 def inputs():
   if not FLAGS.data_dir:
@@ -28,7 +28,7 @@ def conv2d(images, W):
     return tf.nn.conv2d(images, W, strides = [1, 1, 1, 1], padding = 'SAME')
 
 def max_pool_5x5(images):
-    return tf.nn.max_pool(images, ksize = [1, 5, 5, 1], strides = [1, 1, 1, 1], padding = 'VALID')
+    return tf.nn.max_pool(images, ksize = [1, 5, 5, 1], strides = [1, 5, 5, 1], padding = 'SAME')
 
 def forward_propagation(images):
   with tf.variable_scope('conv1') as scope:
@@ -64,11 +64,10 @@ def forward_propagation(images):
       return y_conv
 
 def error(forward_propagation_results, labels):
-    labels = tf.one_hot([1, 2, 3, 4], 20, on_value=None, off_value=None, axis=None, dtype=None, name=None)
-    labels = tf.cast(labels, tf.int64)
+    labels = tf.one_hot(labels, 4)
+    tf.transpose(labels)
+    labels = tf.cast(labels, tf.float32)
     mean_squared_error = tf.square(tf.sub(labels, forward_propagation_results))
     cost = tf.reduce_mean(mean_squared_error)
     train = tf.train.GradientDescentOptimizer(learning_rate = 0.3).minimize(cost)
-    return train
-
-    print cost
+    return train, cost

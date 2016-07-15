@@ -30,6 +30,8 @@ def read_data(filename_queue):
 
   result.uint8image = tf.transpose(depth_major, [1, 2, 0])
 
+  print record_bytes
+
   return result
 
 def generate_batch(image, label, min_queue_examples, batch_size, shuffle):
@@ -43,19 +45,16 @@ def _generate_image_and_label_batch(image, label, min_queue_examples,
   if shuffle:
     images, label_batch = tf.train.shuffle_batch(
         [image, label],
-        batch_size=batch_size,
-        num_threads=num_preprocess_threads,
-        capacity=min_queue_examples + 3 * batch_size,
-        min_after_dequeue=min_queue_examples)
+        batch_size = batch_size,
+        num_threads = num_preprocess_threads,
+        capacity = min_queue_examples + 3 * batch_size,
+        min_after_dequeue = min_queue_examples)
   else:
     images, label_batch = tf.train.batch(
         [image, label],
-        batch_size=batch_size,
-        num_threads=num_preprocess_threads,
-        capacity=min_queue_examples + 3 * batch_size)
-
-  # Display the training images in the visualizer.
-  tf.image_summary('images', images)
+        batch_size = batch_size,
+        num_threads = num_preprocess_threads,
+        capacity = min_queue_examples + 3 * batch_size)
 
   return images, tf.reshape(label_batch, [batch_size])
 
@@ -72,15 +71,12 @@ def inputs(data_dir, batch_size):
   height = IMAGE_SIZE
   width = IMAGE_SIZE
 
-  resized_image = tf.image.resize_image_with_crop_or_pad(reshaped_image,
-                                                         width, height)
-
-  float_image = tf.image.per_image_whitening(resized_image)
-
   min_fraction_of_examples_in_queue = 0.4
   min_queue_examples = int(num_examples_per_epoch *
                            min_fraction_of_examples_in_queue)
 
-  return _generate_image_and_label_batch(float_image, read_input.label,
+  print reshaped_image
+
+  return _generate_image_and_label_batch(reshaped_image, read_input.label,
                                          min_queue_examples, batch_size,
-                                         shuffle=False)
+                                         shuffle = False)

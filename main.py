@@ -3,18 +3,21 @@ import Process
 
 import tensorflow as tf
 
-
 def train():
     with tf.Session() as sess:
         images, labels = Process.inputs()
 
         forward_propgation_results = Process.forward_propagation(images)
 
-        train_loss = Process.error(forward_propgation_results, labels)
+        train_loss, cost = Process.error(forward_propgation_results, labels)
 
         init = tf.initialize_all_variables()
 
         sess.run(init)
+
+        for i in range(100):
+            print(sess.run([train_loss, cost]))
+            print(test)
 
 def main(argv = None):
     train()
