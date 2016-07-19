@@ -7,13 +7,14 @@ import Input
 FLAGS = tf.app.flags.FLAGS
 
 tf.app.flags.DEFINE_integer('batch_size', 20, "hello")
-tf.app.flags.DEFINE_string('data_dir', '/Volumes/Machine_Learning_Data/DATA', "hello")
+tf.app.flags.DEFINE_string('data_dir', '/Users/Zanhuang/Desktop/NNP', "hello")
+
 
 def inputs():
   if not FLAGS.data_dir:
-    raise ValueError('Please supply a data_dir')
-  data_dir = os.path.join(FLAGS.data_dir, 'Data')
-  images, labels = Input.inputs(data_dir = data_dir, batch_size = FLAGS.batch_size)
+    raise ValueError('Source Data Missing')
+  data_dir = FLAGS.data_dir
+  images, labels = Input.inputs(data_dir=data_dir, batch_size=FLAGS.batch_size)
   return images, labels
 
 def weight_variable(shape):
