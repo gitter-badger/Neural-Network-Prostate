@@ -5,6 +5,9 @@ from __future__ import print_function
 import tensorflow as tf
 import glob, os
 
+import PIL
+import cPickle as pk
+
 from six.moves import xrange
 
 IMAGE_SIZE = 1750
@@ -38,29 +41,28 @@ def read_data(filename_queue):
 
   return result
 
-def generate_batch(image, label, min_queue_examples, batch_size, shuffle):
-  num_preprocess_threads = 4
-  images, label_batch = tf.train.batch([image, label], batch_size = batch_size, num_threads = num_preprocess_threads, capacity = min_queue_examples + 3 * batch_size)
-  return images, tf.reshape(label_batch, [batch_size])
-
 def _generate_image_and_label_batch(image, label, min_queue_examples,
                                     batch_size, shuffle):
-  num_preprocess_threads = 16
+  num_preprocess_threads = 8
   if shuffle:
     images, label_batch = tf.train.shuffle_batch(
         [image, label],
-        batch_size = batch_size,
-        num_threads = num_preprocess_threads,
-        capacity = min_queue_examples + 3 * batch_size,
-        min_after_dequeue = min_queue_examples)
+        batch_size=batch_size,
+        num_threads=num_preprocess_threads,
+        capacity=min_queue_examples + 3 * batch_size,
+        min_after_dequeue=min_queue_examples)
   else:
     images, label_batch = tf.train.batch(
         [image, label],
-        batch_size = batch_size,
-        num_threads = num_preprocess_threads,
-        capacity = min_queue_examples + 3 * batch_size)
+        batch_size=batch_size,
+        num_threads=num_preprocess_threads,
+        capacity=min_queue_examples + 3 * batch_size)
+
+  # Display the training images in the visualizer.
+  tf.image_summary('images', images)
 
   return images, tf.reshape(label_batch, [batch_size])
+
 
 def inputs(data_dir, batch_size):
 
@@ -80,10 +82,10 @@ def inputs(data_dir, batch_size):
   height = IMAGE_SIZE
   width = IMAGE_SIZE
 
-  min_fraction_of_examples_in_queue = 0.5
+  min_fraction_of_examples_in_queue = 0.4
   min_queue_examples = int(NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN *
                            min_fraction_of_examples_in_queue)
-  print ('Filling queue with %d Prostate Cancer images before starting to train. '
+  print ('Filling queue with %d CIFAR images before starting to train. '
          'This will take a few minutes.' % min_queue_examples)
 
   # Generate a batch of images and labels by building up a queue of examples.

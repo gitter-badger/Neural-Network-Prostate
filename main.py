@@ -13,6 +13,8 @@ def train():
 
         init = tf.initialize_all_variables()
 
+        tf.train.start_queue_runners(sess=sess)
+
         sess.run(init)
 
         for i in range(100):
