@@ -17,9 +17,8 @@ def train():
 
         sess.run(init)
 
-        for i in range(100):
+        for i in range(1000):
             print(sess.run([train_loss, cost]))
-            print(test)
 
 def main(argv = None):
     train()

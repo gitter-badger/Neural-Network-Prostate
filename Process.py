@@ -6,7 +6,7 @@ import Input
 
 FLAGS = tf.app.flags.FLAGS
 
-tf.app.flags.DEFINE_integer('batch_size', 20, "hello")
+tf.app.flags.DEFINE_integer('batch_size', 1, "hello")
 tf.app.flags.DEFINE_string('data_dir', '/Users/Zanhuang/Desktop/NNP', "hello")
 
 
@@ -56,12 +56,11 @@ def forward_propagation(images):
       b_fc1 = bias_variable([256])
       h_pool3_flat = tf.reshape(h_pool3, [FLAGS.batch_size, 14 * 14 * 128])
       h_fc1 = tf.nn.sigmoid(tf.matmul(h_pool3_flat, W_fc1) + b_fc1)
-      keep_prob = tf.placeholder(tf.float32)
-      h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
+      keep_prob = tf.Variable(1.0)
       W_fc2 = weight_variable([256, 4])
       b_fc2 = bias_variable([4])
 
-      y_conv = tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
+      y_conv = tf.nn.softmax(tf.matmul(h_fc1, W_fc2) + b_fc2)
       return y_conv
 
 def error(forward_propagation_results, labels):
@@ -70,5 +69,5 @@ def error(forward_propagation_results, labels):
     labels = tf.cast(labels, tf.float32)
     mean_squared_error = tf.square(tf.sub(labels, forward_propagation_results))
     cost = tf.reduce_mean(mean_squared_error)
-    train = tf.train.GradientDescentOptimizer(learning_rate = 0.3).minimize(cost)
+    train = tf.train.GradientDescentOptimizer(learning_rate = 0.4).minimize(cost)
     return train, cost

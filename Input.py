@@ -82,7 +82,7 @@ def inputs(data_dir, batch_size):
   height = IMAGE_SIZE
   width = IMAGE_SIZE
 
-  min_fraction_of_examples_in_queue = 0.4
+  min_fraction_of_examples_in_queue = 1.0
   min_queue_examples = int(NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN *
                            min_fraction_of_examples_in_queue)
   print ('Filling queue with %d CIFAR images before starting to train. '
