@@ -1,55 +1,21 @@
-import numpy as np
-import cPickle as pk
 from PIL import Image
-
+import numpy as np
 import glob
 
 
-def loadImage(filename):
-	'''return a Image obect'''
-	return Image.open(filename)
+for img in glob.glob("*.jpg"):
+	for i in range(1):
+		im = Image.open(img)
+		im = (np.array(im))
+		print(im)
 
+		r = im[:,:,0].flatten()
+		g = im[:,:,1].flatten()
+		b = im[:,:,2].flatten()
+		label = [0]
 
-def pickle_data(filename, data, mode='wb'):
-	with open(filename, mode) as file:
-		pk.dump(data, file)
+		begin = np.array(list(label) + list(r) + list(g) + list(b), np.uint8)
 
-
-def unpickle_data(filename, mode = 'rb'):
-	with open(filename, mode) as file:
-		data = pk.load(file)
-	return data
-
-def loadAllPic():
-	dict = {}
-	imgdata = []
-	imglabel = []
-
-	for file in glob.glob('*.jpg'):
-		print file
-		img = loadImage(file)
-		rawdata = img.load()
-		redchannel = [rawdata[x, y][0] for x in range(img.width) for y in range(img.height)]
-		greenchannel = [rawdata[x, y][1] for x in range(img.width) for y in range(img.height)]
-		bluechannel = [rawdata[x, y][2] for x in range(img.width) for y in range(img.height)]
-		nparray = np.array(redchannel + greenchannel + bluechannel)
-		imgdata.append(nparray)
-		imglabel.append("Gleason_3")
-	dict['data'] = imgdata
-	dict['labels'] = imglabel
-	return dict
-
-
-def main():
-	dict = loadAllPic()
-	pickle_data('Prostate_Cancer_Data.binary', dict)
-
-	data = unpickle_data('Prostate_Cancer_Data.binary')
-	print data.viewkeys()
-	print data['labels'][:100]
-	print data['data'][0]
-
-
-
-if __name__ == '__main__':
-	main()
+	new_array = np.array(list(r) + list(g) + list(b), np.uint8)
+	NEW = np.append(begin, new_array, 0)
+	NEW.tofile("Prostate_Cacer_Data1.bin")
