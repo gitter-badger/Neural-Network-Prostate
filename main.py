@@ -17,7 +17,7 @@ def train():
 
         train_loss, cost = Process.error(forward_propgation_results, labels)
 
-        image_summary_t = tf.image_summary(images.name, images, max_images=1)
+        image_summary_t = tf.image_summary(images.name, images, max_images = 3)
 
         summary_op = tf.merge_all_summaries()
 
@@ -31,11 +31,14 @@ def train():
 
         tf.train.start_queue_runners(sess = sess)
 
-        train_dir = "/Users/Zanhuang/Desktop/NNP"
+        train_dir = "/Users/Zanhuang/Desktop/NNP/model.ckpt"
 
-        summary_writer = tf.train.SummaryWriter(train_dir, sess.graph)
+        train_dir2 = "/Users/Zanhuang/Desktop/NNP"
 
-        for step in range(30):
+
+        summary_writer = tf.train.SummaryWriter(train_dir2, sess.graph)
+
+        for step in range(200):
             start_time = time.time()
             print(sess.run([train_loss, cost]))
             duration = time.time() - start_time
@@ -50,7 +53,7 @@ def train():
                 summary_str = sess.run(summary_op)
                 summary_writer.add_summary(summary_str, step)
 
-                if step % 30 == 0:
+                if step % 50 == 0:
                     checkpoint_path = train_dir
                     saver.save(sess, checkpoint_path, global_step=step)
 

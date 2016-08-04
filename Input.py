@@ -5,20 +5,19 @@ from __future__ import print_function
 import tensorflow as tf
 import glob, os
 
-import PIL
-import cPickle as pk
-
 from six.moves import xrange
 
 IMAGE_SIZE = 1750
 NUM_CLASSES = 4
-NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 3
-NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 3
+NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 10
+NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 10
+
+data_dir_2 = "/Users/Zanhuang/Desktop/NNP"
 
 def read_data(filename_queue):
-  class CIFAR10Record(object):
+  class Record(object):
     pass
-  result = CIFAR10Record()
+  result = Record()
 
   label_bytes = 1
   result.height = 1750
@@ -64,7 +63,7 @@ def _generate_image_and_label_batch(image, label, min_queue_examples,
 
 
 def inputs(data_dir, batch_size):
-  filenames = [os.path.join(data_dir, 'Prostate_Cancer_Data%d.binary' % i)
+  filenames = [os.path.join(data_dir, 'Prostate_Cancer_Data%d.bin' % i)
                for i in xrange(1, 4)]
   for f in filenames:
     if not tf.gfile.Exists(f):
@@ -78,9 +77,27 @@ def inputs(data_dir, batch_size):
   height = IMAGE_SIZE
   width = IMAGE_SIZE
 
-  min_fraction_of_examples_in_queue = 1.0
+  min_fraction_of_examples_in_queue = 0.5
   min_queue_examples = int(NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN * min_fraction_of_examples_in_queue)
 
   print ('Filling queue with %d CIFAR images before starting to train. This will take a few minutes.' % min_queue_examples)
 
   return _generate_image_and_label_batch(reshaped_image, read_input.label, min_queue_examples, batch_size, shuffle=True)
+
+def eval_inputs(data_dir, batch_size):
+
+  filenames = [os.path.join(data_dir_2, 'Prostate_Cancer_Data4.bin')]
+  num_examples_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
+
+  filename_queue = tf.train.string_input_producer(filenames)
+
+  read_input = read_data(filename_queue)
+  reshaped_image = tf.cast(read_input.uint8image, tf.float32)
+
+  height = IMAGE_SIZE
+  width = IMAGE_SIZE
+
+  min_fraction_of_examples_in_queue = 1
+  min_queue_examples = int(num_examples_per_epoch * min_fraction_of_examples_in_queue)
+
+  return _generate_image_and_label_batch(reshaped_image, read_input.label, min_queue_examples, 1, shuffle=False)

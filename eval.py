@@ -1,70 +1,30 @@
-from datetime import datetime
-import math
-import time
-
-import numpy as np
 import tensorflow as tf
 
 import main
 import Process
 import Input
 
-FLAGS = tf.app.flags.FLAGS
-
-checkpoint_dir = "/Users/Zanhuang/Desktop/NNP/Nerual-Network-Prostate.ckpt-0"
-saver = tf.train.Saver()
-
-
-def eval_once(top_k_op):
-  with tf.Session() as sess:
-    ckpt = tf.train.get_checkpoint_state(checkpoint_dir)
-    if ckpt and ckpt.model_checkpoint_path:
-        saver.restore(sess, ckpt.model_checkpoint_path)
-    else:
-      print('No checkpoint file found')
-      return
-
-    coord = tf.train.Coordinator()
-    try:
-      threads = []
-      for qr in tf.get_collection(tf.GraphKeys.QUEUE_RUNNERS):
-        threads.extend(qr.create_threads(sess, coord=coord, daemon=True,
-                                         start=True))
-
-      num_iter = int(math.ceil(FLAGS.num_examples / FLAGS.batch_size))
-      true_count = 0
-      total_sample_count = num_iter * FLAGS.batch_size
-      step = 0
-      while step < num_iter and not coord.should_stop():
-        predictions = sess.run([top_k_op])
-        true_count += np.sum(predictions)
-        step += 1
-
-      precision = true_count / total_sample_count
-      print('%s: precision @ 1 = %.3f' % (datetime.now(), precision))
-    except Exception as e:  # pylint: disable=broad-except
-      coord.request_stop(e)
-
-    coord.request_stop()
-    coord.join(threads, stop_grace_period_secs=10)
+eval_dir = "/Users/Zanhuang/Desktop/NNP/model.ckpt-250"
+checkpoint_dir = "/Users/Zanhuang/Desktop/NNP/checkpoint"
 
 
 def evaluate():
   with tf.Graph().as_default() as g:
-    images, labels = Process.inputs()
+    images, labels = Process.eval_inputs()
+    forward_propgation_results = Process.forward_propagation(images)
+    init_op = tf.initialize_all_variables()
+    saver = tf.train.Saver()
+    top_k_op = tf.nn.in_top_k(forward_propgation_results, labels, 1)
 
-    cost = Process.forward_propagation(images)
+  with tf.Session(graph = g) as sess:
+    sess.run(init_op)
+    tf.train.start_queue_runners(sess=sess)
+    saver.restore(sess, eval_dir)
+    for i in range(100):
+        print(sess.run(top_k_op))
 
-    top_k_op = tf.nn.in_top_k(cost, labels, 1)
-
-    while True:
-      eval_once(top_k_op)
-
-
-
-def main(argv=None):
-
-  evaluate()
+def main(argv = None):
+    evaluate()
 
 if __name__ == '__main__':
   tf.app.run()

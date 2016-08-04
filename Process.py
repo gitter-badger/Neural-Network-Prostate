@@ -25,8 +25,15 @@ def inputs():
   if not FLAGS.data_dir:
     raise ValueError('Source Data Missing')
   data_dir = FLAGS.data_dir
-  images, labels = Input.inputs(data_dir = data_dir, batch_size = FLAGS.batch_size)
+  images, labels = Input.inputs(data_dir = data_dir_2, batch_size = FLAGS.batch_size)
   return images, labels
+
+
+def eval_inputs():
+  data_dir = Input.data_dir_2
+  images, labels = Input.eval_inputs(data_dir = data_dir, batch_size = 1)
+  return images, labels
+
 
 def weight_variable(shape):
     initial = tf.truncated_normal(shape, stddev=0.1)
@@ -77,8 +84,6 @@ def forward_propagation(images):
       y_conv = tf.nn.softmax(tf.matmul(h_fc1, W_fc2) + b_fc2)
       _activation_summary(y_conv)
       return y_conv
-
-
 
 def error(forward_propagation_results, labels):
     labels = tf.one_hot(labels, 4)
