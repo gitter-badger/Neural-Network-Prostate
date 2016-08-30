@@ -4,9 +4,9 @@ import main
 import Process
 import Input
 
-eval_dir = "/Users/Zanhuang/Desktop/NNP/model.ckpt-250"
-checkpoint_dir = "/Users/Zanhuang/Desktop/NNP/checkpoint"
-
+eval_dir = "/home/zan/Desktop/NNP/model.ckpt/checkpoint"
+checkpoint_dir = "/home/zan/Desktop/NNP/model.ckpt"
+#ckpt = tf.train.get_checkpoint_state(checkpoint_dir)
 
 def evaluate():
   with tf.Graph().as_default() as g:
@@ -17,9 +17,12 @@ def evaluate():
     top_k_op = tf.nn.in_top_k(forward_propgation_results, labels, 1)
 
   with tf.Session(graph = g) as sess:
+    tf.train.start_queue_runners(sess = sess)
     sess.run(init_op)
-    tf.train.start_queue_runners(sess=sess)
     saver.restore(sess, eval_dir)
+    #if ckpt and ckpt.model_checkpoint_path:
+      #  saver.restore(sess, ckpt.model_checkpoint_path)
+
     for i in range(100):
         print(sess.run(top_k_op))
 

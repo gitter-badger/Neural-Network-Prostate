@@ -3,6 +3,7 @@ import Process
 
 import time
 import numpy as np
+import os
 
 import tensorflow as tf
 from datetime import datetime
@@ -11,13 +12,14 @@ FLAGS = tf.app.flags.FLAGS
 
 def train():
     with tf.Session() as sess:
+
         images, labels = Process.inputs()
 
         forward_propgation_results = Process.forward_propagation(images)
 
-        train_loss, cost = Process.error(forward_propgation_results, labels)
+        cost, train_loss = Process.error(forward_propgation_results, labels)
 
-        image_summary_t = tf.image_summary(images.name, images, max_images = 3)
+        image_summary_t = tf.image_summary(images.name, images, max_images = 2)
 
         summary_op = tf.merge_all_summaries()
 
@@ -31,14 +33,11 @@ def train():
 
         tf.train.start_queue_runners(sess = sess)
 
-        train_dir = "/Users/Zanhuang/Desktop/NNP/model.ckpt"
+        train_dir = "/home/zan/Desktop/NNP/model.ckpt"
 
-        train_dir2 = "/Users/Zanhuang/Desktop/NNP"
+        summary_writer = tf.train.SummaryWriter(train_dir, sess.graph)
 
-
-        summary_writer = tf.train.SummaryWriter(train_dir2, sess.graph)
-
-        for step in range(200):
+        for step in range(100):
             start_time = time.time()
             print(sess.run([train_loss, cost]))
             duration = time.time() - start_time
@@ -53,9 +52,10 @@ def train():
                 summary_str = sess.run(summary_op)
                 summary_writer.add_summary(summary_str, step)
 
-                if step % 50 == 0:
-                    checkpoint_path = train_dir
-                    saver.save(sess, checkpoint_path, global_step=step)
+
+                if step % 2 == 0:
+                    checkpoint_path = os.path.join(train_dir, 'model.ckpt')
+                    saver.save(sess, checkpoint_path, global_step = step)
 
 
 def main(argv = None):

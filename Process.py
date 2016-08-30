@@ -9,11 +9,12 @@ import os, re
 FLAGS = tf.app.flags.FLAGS
 TOWER_NAME = 'tower'
 
-tf.app.flags.DEFINE_integer('batch_size', 4, "hello")
-tf.app.flags.DEFINE_string('data_dir', '/Users/Zanhuang/Desktop/NNP', "hello")
+tf.app.flags.DEFINE_integer('batch_size', 1, "hello")
+tf.app.flags.DEFINE_string('data_dir', '/home/zan/Desktop/NNP', "hello")
 
 NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = Input.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
 NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = Input.NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
+NUM_EPOCHS_PER_DECAY = 5
 
 
 def _activation_summary(x):
@@ -25,12 +26,12 @@ def inputs():
   if not FLAGS.data_dir:
     raise ValueError('Source Data Missing')
   data_dir = FLAGS.data_dir
-  images, labels = Input.inputs(data_dir = data_dir_2, batch_size = FLAGS.batch_size)
+  images, labels = Input.inputs(data_dir = data_dir, batch_size = FLAGS.batch_size)
   return images, labels
 
 
 def eval_inputs():
-  data_dir = Input.data_dir_2
+  data_dir = FLAGS.data_dir
   images, labels = Input.eval_inputs(data_dir = data_dir, batch_size = 1)
   return images, labels
 
@@ -91,10 +92,10 @@ def error(forward_propagation_results, labels):
     labels = tf.cast(labels, tf.float32)
     mean_squared_error = tf.square(tf.sub(labels, forward_propagation_results))
     cost = tf.reduce_mean(mean_squared_error)
-    train = tf.train.GradientDescentOptimizer(learning_rate = 0.05).minimize(cost)
+    train_loss = tf.train.GradientDescentOptimizer(learning_rate = 0.05).minimize(cost)
     tf.histogram_summary('accuracy', mean_squared_error)
     tf.add_to_collection('losses', cost)
 
     tf.scalar_summary('LOSS', cost)
 
-    return train, cost
+    return train_loss, cost
