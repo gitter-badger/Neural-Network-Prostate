@@ -9,8 +9,8 @@ import os, re
 FLAGS = tf.app.flags.FLAGS
 TOWER_NAME = 'tower'
 
-tf.app.flags.DEFINE_integer('batch_size', 1, "hello")
-tf.app.flags.DEFINE_string('data_dir', '/home/zan/Desktop/NNP', "hello")
+tf.app.flags.DEFINE_integer('batch_size', 5, "hello")
+tf.app.flags.DEFINE_string('data_dir', '/home/zan/Desktop/Neural-Network-Prostate', "hello")
 
 NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = Input.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
 NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = Input.NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
