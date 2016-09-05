@@ -33,7 +33,7 @@ def train():
 
         tf.train.start_queue_runners(sess = sess)
 
-        train_dir = "/home/zan/Desktop/NNP/model.ckpt"
+        train_dir = "/home/zan/Desktop/Neural-Network-Prostate/model.ckpt"
 
         summary_writer = tf.train.SummaryWriter(train_dir, sess.graph)
 
