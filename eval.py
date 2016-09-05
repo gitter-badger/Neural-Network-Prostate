@@ -4,8 +4,8 @@ import main
 import Process
 import Input
 
-eval_dir = "/home/zan/Desktop/NNP/model.ckpt/checkpoint"
-checkpoint_dir = "/home/zan/Desktop/NNP/model.ckpt"
+eval_dir = "/home/zan/Desktop/Neural-Network-Prostate/model.ckpt/checkpoint"
+checkpoint_dir = "/home/zan/Desktop/Neural-Network-Prostate/model.ckpt"
 #ckpt = tf.train.get_checkpoint_state(checkpoint_dir)
 
 def evaluate():
