@@ -9,8 +9,8 @@ from six.moves import xrange
 
 IMAGE_SIZE = 1750
 NUM_CLASSES = 4
-NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 4
-NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 1000
+NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 100
+NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 16
 
 
 def read_data(filename_queue):
@@ -84,7 +84,10 @@ def inputs(data_dir, batch_size):
   return _generate_image_and_label_batch(reshaped_image, read_input.label, min_queue_examples, batch_size, shuffle=True)
 
 def eval_inputs(data_dir, batch_size):
-  filenames = [os.path.join(data_dir, 'Prostate_Cancer_Data1.bin')]
+
+  data_dir2 = '/home/zan/Desktop/Neural-Network-Prostate/model.ckpt'
+
+  filenames = [os.path.join(data_dir2, 'Prostate_Cancer_Data1.bin')]
   num_examples_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 
   filename_queue = tf.train.string_input_producer(filenames)

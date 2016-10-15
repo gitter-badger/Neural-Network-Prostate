@@ -1,10 +1,11 @@
+
 import tensorflow as tf
 
 import main
 import Process
 import Input
 
-eval_dir = "/home/zan/Desktop/Neural-Network-Prostate/model.ckpt/checkpoint"
+eval_dir = "/home/zan/Desktop/Neural-Network-Prostate/model.ckpt"
 checkpoint_dir = "/home/zan/Desktop/Neural-Network-Prostate/model.ckpt"
 #ckpt = tf.train.get_checkpoint_state(checkpoint_dir)
 
@@ -30,4 +31,4 @@ def main(argv = None):
     evaluate()
 
 if __name__ == '__main__':
-  tf.app.run()
+    tf.app.run()
