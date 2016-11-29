@@ -14,7 +14,12 @@ tf.app.flags.DEFINE_string('data_dir', '/home/zan/Desktop/Neural-Network-Prostat
 
 NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = Input.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
 NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = Input.NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
-NUM_EPOCHS_PER_DECAY = 5
+NUM_EPOCHS_PER_DECAY = 3
+
+MOVING_AVERAGE_DECAY = 0.9999
+NUM_EPOCHS_PER_DECAY = 30
+LEARNING_RATE_DECAY_FACTOR = 0.1
+INITIAL_LEARNING_RATE = 0.1
 
 
 def _activation_summary(x):
@@ -34,7 +39,6 @@ def eval_inputs():
   data_dir = FLAGS.data_dir
   images, labels = Input.eval_inputs(data_dir = data_dir, batch_size = 1)
   return images, labels
-
 
 def weight_variable(shape):
     initial = tf.truncated_normal(shape, stddev=0.1)
@@ -92,10 +96,57 @@ def error(forward_propagation_results, labels):
     labels = tf.cast(labels, tf.float32)
     mean_squared_error = tf.square(tf.sub(labels, forward_propagation_results))
     cost = tf.reduce_mean(mean_squared_error)
-    train_loss = tf.train.GradientDescentOptimizer(learning_rate = 0.05).minimize(cost)
+    #train_loss = tf.train.GradientDescentOptimizer(learning_rate = 0.05).minimize(cost)
     tf.histogram_summary('accuracy', mean_squared_error)
     tf.add_to_collection('losses', cost)
 
     tf.scalar_summary('LOSS', cost)
 
-    return train_loss, cost
+    return cost
+
+def _add_loss_summaries(cost):
+  loss_averages = tf.train.ExponentialMovingAverage(0.9, name='avg')
+  losses = tf.get_collection('LOSS')
+  loss_averages_op = loss_averages.apply(losses + [cost])
+
+  for l in losses + [cost]:
+    tf.scalar_summary(l.op.name +' (raw)', l)
+    tf.scalar_summary(l.op.name, loss_averages.average(l))
+
+  return loss_averages_op
+
+def train(cost, global_step):
+    num_batches_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN / FLAGS.batch_size
+    decay_steps = int(num_batches_per_epoch * NUM_EPOCHS_PER_DECAY)
+
+    lr = tf.train.exponential_decay(INITIAL_LEARNING_RATE,
+                                  global_step,
+                                  decay_steps,
+                                  LEARNING_RATE_DECAY_FACTOR,
+                                  staircase=True)
+    tf.scalar_summary('learning_rate', lr)
+
+    loss_averages_op = _add_loss_summaries(cost)
+
+    with tf.control_dependencies([loss_averages_op]):
+      opt = tf.train.GradientDescentOptimizer(lr)
+      grads = opt.compute_gradients(cost)
+
+    apply_gradient_op = opt.apply_gradients(grads, global_step=global_step)
+
+
+    for var in tf.trainable_variables():
+      tf.histogram_summary(var.op.name, var)
+
+    for grad, var in grads:
+      if grad is not None:
+        tf.histogram_summary(var.op.name + '/gradients', grad)
+
+    variable_averages = tf.train.ExponentialMovingAverage(
+        MOVING_AVERAGE_DECAY, global_step)
+    variables_averages_op = variable_averages.apply(tf.trainable_variables())
+
+    with tf.control_dependencies([apply_gradient_op, variables_averages_op]):
+      train_op = tf.no_op(name='train')
+
+    return train_op

@@ -5,6 +5,7 @@ import numpy as np
 import os
 
 import tensorflow as tf
+from six.moves import xrange
 from datetime import datetime
 
 FLAGS = tf.app.flags.FLAGS
@@ -12,37 +13,38 @@ FLAGS = tf.app.flags.FLAGS
 
 def train():
     with tf.Graph().as_default():
-
+        global_step = tf.Variable(0, trainable=False)
         images, labels = Process.inputs()
-
         forward_propgation_results = Process.forward_propagation(images)
 
-        cost, train_loss = Process.error(forward_propgation_results, labels)             
+        cost = Process.error(forward_propgation_results, labels)
 
-        image_summary_t = tf.image_summary(images.name, images, max_images = 2)
+        train_op = Process.train(cost, global_step)
+
+        saver = tf.train.Saver()
 
         summary_op = tf.merge_all_summaries()
 
         init = tf.initialize_all_variables()
 
-        saver = tf.train.Saver()
-        
-        sess = tf.InteractiveSession()        
+        sess = tf.InteractiveSession()
 
         sess.run(init)
 
         saver = tf.train.Saver(tf.all_variables())
-    
+
         tf.train.start_queue_runners(sess = sess)
 
-        train_dir = "/home/zan/Desktop/Neural-Network-Prostate"
+        train_dir = "/home/zan/nn-data"
 
         summary_writer = tf.train.SummaryWriter(train_dir, sess.graph)
 
         for step in xrange(650):
             start_time = time.time()
-            print(sess.run([train_loss, cost]))
+            _, loss_value = sess.run([train_op, cost])
             duration = time.time() - start_time
+
+            assert not np.isnan(loss_value)
 
             if step % 1 == 0:
                 num_examples_per_step = FLAGS.batch_size
@@ -56,23 +58,9 @@ def train():
                 summary_writer.add_summary(summary_str, step)
 
 
-            if step % 650 == 650:
+            if step % 20 or (step + 1) == 20:
                 checkpoint_path = os.path.join(train_dir, 'model.ckpt')
-                saver.save(sess, checkpoint_path)
-                print "hello"
-
-                sess.close()
-
-                with tf.Session() as sess:                
-
-                    eval_images, eval_labels = Process.eval_inputs()
-        
-                    evaluation_forward_propagation_results = Process.forward_propagation(eval_images)   
-                    top_k_op = Process.evaluate(evaluation_forward_propagation_results, eval_labels)
-
-                    for i in range(16):
-                        print(sess.run([top_k_op]))
-
+                saver.save(sess, checkpoint_path, global_step=step)
 
 def main(argv = None):
     train()
